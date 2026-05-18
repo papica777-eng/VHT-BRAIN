@@ -152,8 +152,35 @@ To run and explore the clinical telemetry HUD locally:
    ```bash
    git clone https://github.com/papica777-eng/VIRTUAL-HUMAN-TWIN.git
    ```
-2. Simply open [**`index.html`**](file:///z:/VIRTUAL-HUMAN-TWIN/index.html) inside any modern web browser to navigate the research portfolio.
-3. Click on the **Launch VHT HUD** buttons or navigate to `/hud.html` to explore the interactive tumor cell apoptosis sweep models.
+2. Simply open [**`index.html`**](index.html) inside any modern web browser to navigate the research portfolio.
+3. Click on the **Launch VHT HUD** buttons or navigate to [**`hud.html`**](hud.html) to explore the interactive tumor cell apoptosis sweep models.
+
+---
+
+## 🔌 Live Local Telemetry Backend Integration (Clinical Presentations)
+
+To enable live telemetry data streaming to the Virtual Human Twin HUD, clinicians and medical IT departments can run the standalone AETERNA local telemetry backend. This transitions the HUD connection status from **`NEURAL LINK: SEVERED`** to **`NEURAL LINK: ESTABLISHED`** and streams live simulated biophysical cellular pathway packet updates.
+
+### Starting the Local Telemetry Backend:
+
+The telemetry server is built on **Bun**'s high-performance native WebSocket engine, requiring zero external dependencies.
+
+1. Ensure **Bun** is installed on your local host (or use standard **Node.js**).
+2. Open a terminal at the root of the repository and run:
+   ```bash
+   bun run hud_local_server.js
+   ```
+   *(Alternatively, if running standard Node.js: `node hud_local_server.js`)*
+3. The terminal will log:
+   ```text
+   /// ════════════════════════════════════════════════════════════════ ///
+   /// AETERNA VIRTUAL HUMAN TWIN — LOCAL TELEMETRY BACKEND             ///
+   /// Architect: Dimitar Prodromov                                     ///
+   /// ════════════════════════════════════════════════════════════════ ///
+
+   [ONLINE] Live telemetry server listening on ws://127.0.0.1:3847
+   ```
+4. Open or refresh [**`hud.html`**](hud.html) in your browser. The connection status indicator will immediately turn **green (ESTABLISHED)**, and the HUD terminal will begin ingesting live genomic transaction blocks and physical Ryzen cellular performance metrics in real-time.
 
 ---
 
