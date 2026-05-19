@@ -1,4 +1,4 @@
-soul/docs/refined_purple_twins_signed.png # 🧬 AETERNA Virtual Human Twin (VHT)
+# 🧬 AETERNA Virtual Human Twin (VHT)
 
 ### Sovereign Multi-Scale Oncology Simulation & Patient-Specific Apoptosis Modeling
 
