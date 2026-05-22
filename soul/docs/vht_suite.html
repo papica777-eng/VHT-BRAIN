@@ -7,6 +7,7 @@
     
     <!-- Google Fonts for Medical HUD -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
@@ -497,21 +498,21 @@
             let logCure = "";
             
             if (active === "metabolic") {
-                message1 = "🧬 ИНИЦИРАНЕ НА БИОЛОГИЧНО ИЗЛЕКУВАНЕ...";
+                message1 = "[SYSTEM] ИНИЦИРАНЕ НА БИОЛОГИЧНО ИЗЛЕКУВАНЕ...";
                 message2 = "[ТРАНСФОРМАЦИЯ]: Мобилизиране на Pax4 бета-регенеративен отговор...";
-                logCure = "🏆 БИОЛОГИЧНО ИЗЛЕКУВАНЕ: 100% TIR УСПЕШНО ВАЛИДИРАНО.";
+                logCure = "[SUCCESS] БИОЛОГИЧНО ИЗЛЕКУВАНЕ: 100% TIR УСПЕШНО ВАЛИДИРАНО.";
             } else if (active === "neurological") {
-                message1 = "🧠 ИНИЦИРАНЕ НА НЕВРОПРОТЕКТИВНО ИЗЧИСТВАНЕ...";
+                message1 = "[NEURO] ИНИЦИРАНЕ НА НЕВРОПРОТЕКТИВНО ИЗЧИСТВАНЕ...";
                 message2 = "[CATUSKOTI]: Премахване на амилоид-бета и регенерация на синаптичната плътност...";
-                logCure = "🏆 НЕВРОДЕГЕНЕРАТИВЕН ЩИТ: Когнитивната ентропия е успешно свита.";
+                logCure = "[SUCCESS] НЕВРОДЕГЕНЕРАТИВЕН ЩИТ: Когнитивната ентропия е успешно свита.";
             } else if (active === "cardiovascular") {
-                message1 = "🫀 ИНИЦИРАНЕ НА СЪДОВА РЕСТАВРАЦИЯ...";
+                message1 = "[CARDIO] ИНИЦИРАНЕ НА СЪДОВА РЕСТАВРАЦИЯ...";
                 message2 = "[ХЕМОДИНАМИКА]: Разтваряне на липидните плаки и подобряване на LVEF...";
-                logCure = "🏆 КАРДИОВАСКУЛАРЕН ЩИТ: Хемодинамиката е в норма. Прединфарктен риск = 1.2%.";
+                logCure = "[SUCCESS] КАРДИОВАСКУЛАРЕН ЩИТ: Хемодинамиката е в норма. Прединфарктен риск = 1.2%.";
             } else {
-                message1 = "🧬 ИНИЦИРАНЕ НА ЕПИГЕНЕТИЧНО ПОДМЛАДЯВАНЕ...";
+                message1 = "[LONGEVITY] ИНИЦИРАНЕ НА ЕПИГЕНЕТИЧНО ПОДМЛАДЯВАНЕ...";
                 message2 = "[YAMANAKA OSK]: Частично транскрипционно репрограмиране без c-Myc...";
-                logCure = "🏆 КЛЕТЪЧНА РЕГЕНЕРАЦИЯ: Биологичната възраст се върна до базови стойности.";
+                logCure = "[SUCCESS] КЛЕТЪЧНА РЕГЕНЕРАЦИЯ: Биологичната възраст се върна до базови стойности.";
             }
 
             addLogEntry(message1);
@@ -569,26 +570,26 @@
                 state.metabolic.glucose = 16.50;
                 state.metabolic.cPeptide = 0.01;
                 state.metabolic.homaIr = 2.40;
-                addLogEntry("♻️ Нулиране на метаболитните параметри към некомпенсиран хаос.");
+                addLogEntry("[SYSTEM_RESET] Нулиране на метаболитните параметри към некомпенсиран хаос.");
             } else if (active === "neurological") {
                 state.neurological.entropy = 3.82;
                 state.neurological.amyloid = 92.40;
                 state.neurological.tau = 84.10;
                 state.neurological.mmse = 12;
-                addLogEntry("♻️ Нулиране на невроналните нива към неконтролирана протеинова агрегация.");
+                addLogEntry("[SYSTEM_RESET] Нулиране на невроналните нива към неконтролирана протеинова агрегация.");
             } else if (active === "cardiovascular") {
                 state.cardiovascular.entropy = 3.90;
                 state.cardiovascular.resistance = 4.80;
                 state.cardiovascular.lvef = 32;
                 state.cardiovascular.infarctProb = 94.50;
-                addLogEntry("♻️ Нулиране на съдовите хемодинамики към остра исхемична криза.");
+                addLogEntry("[SYSTEM_RESET] Нулиране на съдовите хемодинамики към остра исхемична криза.");
             } else {
                 state.longevity.entropy = 3.95;
                 state.longevity.epigeneticAge = 74.50;
                 state.longevity.zombiePct = 42.10;
                 state.longevity.telomereLength = 4.80;
                 state.longevity.mitochondrialEntropy = 0.65;
-                addLogEntry("♻️ Нулиране на клетъчната био-възраст към напреднало стареене (Hayflick риск).");
+                addLogEntry("[SYSTEM_RESET] Нулиране на клетъчната био-възраст към напреднало стареене (Hayflick риск).");
             }
             renderVanillaHUD();
         }
@@ -600,11 +601,11 @@
             
             if(state.emergencyMode) {
                 document.body.classList.add("emergency-theme");
-                addLogEntry("🚨 NEURAL LINK: SEVERED. Превключване в Emergency_Local_Mode!");
-                addLogEntry("🔒 KNOX TEE: Активирана локална изолация на жизненоважните параметри.");
+                addLogEntry("[CRITICAL_ALERT] NEURAL LINK: SEVERED. Превключване в Emergency_Local_Mode!");
+                addLogEntry("[SECURE_KNOX] KNOX TEE: Активирана локална изолация на жизненоважните параметри.");
             } else {
                 document.body.classList.remove("emergency-theme");
-                addLogEntry("🟢 NEURAL LINK: RESTORED. Knox Heartbeat синхронизиран.");
+                addLogEntry("[ONLINE] NEURAL LINK: RESTORED. Knox Heartbeat синхронизиран.");
             }
             renderVanillaHUD();
         }
@@ -612,7 +613,7 @@
         function switchTwin(twinId) {
             if(state.isTransitioning) return;
             state.activeTwin = twinId;
-            addLogEntry(`🔄 Превключване към: ${twinId.toUpperCase()} Virtual Human Twin.`);
+            addLogEntry(`[SYSTEM] Превключване към: ${twinId.toUpperCase()} Virtual Human Twin.`);
             renderVanillaHUD();
         }
 
@@ -778,16 +779,16 @@
             let twinSelectors = `
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;">
                     <button class="twin-btn ${active === 'metabolic' ? 'active' : ''}" onclick="switchTwin('metabolic')">
-                        🩺 <span>Метаболитен VHT v4.0</span>
+                        <i data-lucide="activity" class="inline-block w-4 h-4 text-emerald-400"></i><span>Метаболитен VHT v4.0</span>
                     </button>
                     <button class="twin-btn ${active === 'neurological' ? 'active' : ''}" onclick="switchTwin('neurological')">
-                        🧠 <span>Неврологичен VHT v5.0</span>
+                        <i data-lucide="brain" class="inline-block w-4 h-4 text-purple-400"></i><span>Неврологичен VHT v5.0</span>
                     </button>
                     <button class="twin-btn ${active === 'cardiovascular' ? 'active' : ''}" onclick="switchTwin('cardiovascular')">
-                        🫀 <span>Кардиоваскуларен VHT v5.0</span>
+                        <i data-lucide="heart" class="inline-block w-4 h-4 text-rose-400"></i><span>Кардиоваскуларен VHT v5.0</span>
                     </button>
                     <button class="twin-btn ${active === 'longevity' ? 'active' : ''}" onclick="switchTwin('longevity')">
-                        🧬 <span>Дълголетие & Сенесценция</span>
+                        <i data-lucide="dna" class="inline-block w-4 h-4 text-blue-400"></i><span>Дълголетие & Сенесценция</span>
                     </button>
                 </div>
             `;
@@ -796,23 +797,23 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div style="display: flex; gap: 12px;">
                         <button class="tab-btn ${state.activeTab === 'dashboard' ? 'active' : ''}" onclick="switchTab('dashboard')">
-                            📊 Научен Панел (Лекари)
+                            <i data-lucide="database" class="inline-block w-3.5 h-3.5 mr-1.5 text-purple-400"></i>Научен Панел (Лекари)
                         </button>
                         <button class="tab-btn ${state.activeTab === 'cohort' ? 'active' : ''}" onclick="switchTab('cohort')">
-                            👥 Кохортно Изследване (900 Близнаци)
+                            <i data-lucide="users" class="inline-block w-3.5 h-3.5 mr-1.5 text-emerald-400"></i>Кохортно Изследване (900 Близнаци)
                         </button>
                         <button class="tab-btn ${state.activeTab === 'pillars' ? 'active' : ''}" onclick="switchTab('pillars')">
-                            🛡️ Трите Стълба на Сигурност
+                            <i data-lucide="shield" class="inline-block w-3.5 h-3.5 mr-1.5 text-blue-400"></i>Трите Стълба на Сигурност
                         </button>
                     </div>
                     <div>
                         ${!isCured && !state.isTransitioning ? `
                             <button class="cure-btn" onclick="triggerCureRestoration()">
-                                🧬 ИНДУЦИРАНЕ НА БИОЛОГИЧЕН РЕСТАРТ
+                                <i data-lucide="play" class="inline-block w-4 h-4 mr-1.5"></i>ИНДУЦИРАНЕ НА БИОЛОГИЧЕН РЕСТАРТ
                             </button>
                         ` : `
                             <button class="tab-btn" onclick="resetCureState()" style="border-color: var(--neon-amber); color: var(--neon-amber);" ${state.isTransitioning ? 'disabled' : ''}>
-                                ♻️ ВЪЗСТАНОВЯВАНЕ НА ХАОСА
+                                <i data-lucide="refresh-cw" class="inline-block w-3.5 h-3.5 mr-1.5 text-amber-400"></i>ВЪЗСТАНОВЯВАНЕ НА ХАОСА
                             </button>
                         `}
                     </div>
@@ -821,7 +822,7 @@
 
             let emergencyBanner = state.emergencyMode ? `
                 <div class="glass-card emergency-card" style="display: flex; gap: 20px; align-items: center; margin-bottom: 28px;">
-                    <div style="font-size: 2.5rem; color: var(--neon-red);">⚠️</div>
+                    <div style="color: var(--neon-red);"><i data-lucide="alert-triangle" class="w-10 h-10"></i></div>
                     <div>
                         <h3 style="font-size: 1.4rem; font-weight: 900; color: var(--neon-red);" class="glow-text-red">EMERGENCY LOCAL MODE ACTIVE // NEURAL LINK SEVERED</h3>
                         <p style="color: #fda4af; font-size: 0.85rem; margin-top: 4px; line-height: 1.5">
@@ -841,7 +842,7 @@
                 let clinicalConclusion = "";
 
                 if (active === "metabolic") {
-                    leftTitle = "🧬 Гликемична траектория на Ден 2 (Steady-State)";
+                    leftTitle = '<i data-lucide="trending-up" class="inline-block w-5 h-5 text-purple-400 mr-2"></i>Гликемична траектория на Ден 2 (Steady-State)';
                     leftDesc = "Метаболитна крива на пациент P-402 при симулация. Зелената зона е клиничната норма.";
                     biomarkersHtml = `
                         <div style="border-left: 4px solid var(--neon-blue); padding-left: 12px;">
@@ -892,7 +893,7 @@
                         ? 'Появата на ендогенен C-пептид (0.90 nmol/L) в съчетание с пълно възстановяване на инсулиновата чувствителност (HOMA-IR = 1.0) бележи успешна Pax4-индуцирана бета-клетъчна регенерация и автологична терапия.'
                         : 'Пациентът е в хаотична метаболитна декомпенсация с абсолютен инсулинов дефицит. Индуцирайте биологичния рестарт чрез централния бутон за регенерация.';
                 } else if (active === "neurological") {
-                    leftTitle = "🧠 Разпад на Амилоидните Протофибрили (Lecanemab)";
+                    leftTitle = '<i data-lucide="brain" class="inline-block w-5 h-5 text-purple-400 mr-2"></i>Разпад на Амилоидните Протофибрили (Lecanemab)';
                     leftDesc = "Моделиране на кинетиката на разпада на Amyloid-beta и регенерация на синаптичния трансдюсер.";
                     biomarkersHtml = `
                         <div style="border-left: 4px solid var(--neon-amber); padding-left: 12px;">
@@ -943,7 +944,7 @@
                         ? 'Моноклоналното антитяло успешно се е свързало с разтворимите протофибрили. CSF Amyloid-Beta е изчистен до 2.10 pg/mL, а Catuskoti оракулът премина към ANUBHAYAM с възстановена когниция (MMSE = 28).'
                         : 'Пациентът е в състояние UBHAYAM (MCI парадокс) с агресивно натрупване на тау нишки. Необходим е незабавен рестарт и пробиване на когнитивната ентропия.';
                 } else if (active === "cardiovascular") {
-                    leftTitle = "🫀 Хемодинамика и Възстановяване на Коронарния Ток";
+                    leftTitle = '<i data-lucide="heart" class="inline-block w-5 h-5 text-rose-400 mr-2"></i>Хемодинамика и Възстановяване на Коронарния Ток';
                     leftDesc = "Коронарна хемодинамика при остра исхемична криза. Моделиране на съдово съпротивление и прединфарктна телеметрия.";
                     biomarkersHtml = `
                         <div style="border-left: 4px solid var(--neon-red); padding-left: 12px;">
@@ -992,7 +993,7 @@
                         ? 'Коронарната съдова проходимост е възстановена. LVEF е нормализиран на 62% чрез редукция на съпротивлението до 1.00. 60-минутният прединфарктен оракул показва стабилно ниво на сигурност (1.20% риск).'
                         : 'ПАЦИЕНТЪТ Е В ОСТРА КАРДИО-ИСХЕМИЧНА КРИЗА! 94.50% риск от инфаркт в следващите 45 минути на база ЕКГ ST-елевация. Незабавно индицирайте съдовата стабилизация.';
                 } else {
-                    leftTitle = "🧬 Клетъчно подмладяване и Митохондриален контрол";
+                    leftTitle = '<i data-lucide="dna" class="inline-block w-5 h-5 text-blue-400 mr-2"></i>Клетъчно подмладяване и Митохондриален контрол';
                     leftDesc = "Horvath Епигенетичен часовник и редукция на митохондриалната ентропия чрез насочен автоложен трансфер.";
                     biomarkersHtml = `
                         <div style="border-left: 4px solid var(--neon-emerald); padding-left: 12px;">
@@ -1094,7 +1095,7 @@
                         <div class="column-flex">
                             <div class="glass-card glow-purple ${state.emergencyMode ? 'emergency-card' : ''}" style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
                                 <h3 style="font-size: 1.2rem; font-weight: 900; display: flex; align-items: center; gap: 8px;">
-                                    ℹ️ Описание на Пациента
+                                    <i data-lucide="info" class="w-5 h-5 text-blue-400"></i>Описание на Пациента
                                 </h3>
                                 
                                 <div style="display: flex; flex-direction: column; gap: 12px;" class="mono">
@@ -1103,7 +1104,7 @@
 
                                 <div style="padding: 16px; background: ${isCured ? 'rgba(0, 255, 170, 0.04)' : 'rgba(255, 59, 111, 0.04)'}; border-radius: 12px; border: 1px solid ${isCured ? 'rgba(0,255,170,0.15)' : 'rgba(255,59,111,0.15)'};">
                                     <div style="font-size: 0.8rem; font-weight: 700; color: ${isCured ? 'var(--neon-emerald)' : 'var(--neon-red)'};" class="mono">
-                                        🔬 КЛИНИЧЕН ИЗВОД:
+                                        <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>КЛИНИЧЕН ИЗВОД:
                                     </div>
                                     <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px; line-height: 1.5;">
                                         ${clinicalConclusion}
@@ -1114,7 +1115,7 @@
                             <!-- Live Telemetry Stream Grid -->
                             <div class="glass-card ${state.emergencyMode ? 'emergency-card' : ''}" style="height: 185px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
                                 <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">
-                                    📟 LIVE_SUBSTRATE_TELEMETRY_LOG
+                                    <i data-lucide="terminal" class="w-3.5 h-3.5 text-emerald-400"></i>LIVE_SUBSTRATE_TELEMETRY_LOG
                                 </div>
                                 <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem;" class="mono text-slate-400">
                                     ${state.logs.map(log => `<div>${log}</div>`).join('')}
@@ -1131,7 +1132,7 @@
                 let rowsHtml = "";
 
                 if (active === "metabolic") {
-                    cohortTitle = "👥 Сравнителен кохортен екран (900 виртуални близнаци)";
+                    cohortTitle = '<i data-lucide="users" class="inline-block w-5 h-5 text-emerald-400 mr-2"></i>Сравнителен кохортен екран (900 виртуални близнаци)';
                     cohortDesc = "Скалиране на автоложното излекуване v4.0 върху цялата извадка на Националния регистър за 2015 г.";
                     tableHeaders = ["Възрастова Група", "Брой близнаци", "Базов TIR (2015)", "Конвенционален TIR", "VHT v3.0 TIR", "v4.0 Биологичен TIR", "Базови Хипогликемии", "v4.0 Хипогликемии"];
                     rowsHtml = cohorts.metabolic.map(row => `
@@ -1151,7 +1152,7 @@
                         </tr>
                     `).join('');
                 } else if (active === "neurological") {
-                    cohortTitle = "👥 Кохортно изследване (Амилоидна тежест & MMSE)";
+                    cohortTitle = '<i data-lucide="users" class="inline-block w-5 h-5 text-emerald-400 mr-2"></i>Кохортно изследване (Амилоидна тежест & MMSE)';
                     cohortDesc = "Ефикасност на Lecanemab при свиване на когнитивната ентропия при 900 виртуални симулации.";
                     tableHeaders = ["Възраст / Стадий", "Брой пациенти", "Базов MMSE", "Конвенционално лечение", "Терапевтичен рестарт", "Прогнозна ефикасност (30 дни)", "Свиване на ентропията"];
                     rowsHtml = cohorts.neurological.map(row => `
@@ -1170,7 +1171,7 @@
                         </tr>
                     `).join('');
                 } else if (active === "cardiovascular") {
-                    cohortTitle = "👥 Хемодинамични кохортни симулации (NYHA Class)";
+                    cohortTitle = '<i data-lucide="users" class="inline-block w-5 h-5 text-emerald-400 mr-2"></i>Хемодинамични кохортни симулации (NYHA Class)';
                     cohortDesc = "1-годишен превантивен ефект на съдова проходимост и LVEF регенерация.";
                     tableHeaders = ["NYHA Група", "Брой пациенти", "Базов LVEF", "Конвенционална терапия", "VHT v3.0 Регенерация", "v5.0 Оптимален LVEF", "Възстановяване на толеранс"];
                     rowsHtml = cohorts.cardiovascular.map(row => `
@@ -1189,7 +1190,7 @@
                         </tr>
                     `).join('');
                 } else {
-                    cohortTitle = "👥 Епигенетично подмладяване и Rejuvenation Cohort";
+                    cohortTitle = '<i data-lucide="users" class="inline-block w-5 h-5 text-emerald-400 mr-2"></i>Епигенетично подмладяване и Rejuvenation Cohort';
                     cohortDesc = "Horvath Epigenetic Clock проследяване след Yamanaka OSK факторен трансфер.";
                     tableHeaders = ["Възрастова Група", "Брой пациенти", "Базов биологичен статус", "Сенолитично прочистване", "Epigenetic Reversal", "Биологична норма (v5.0)", "Lifespan Extension Index"];
                     rowsHtml = cohorts.longevity.map(row => `
@@ -1349,7 +1350,7 @@ process YAMANAKA_OSK_REPROGRAM(
 
                         <div class="glass-card ${state.emergencyMode ? 'emergency-card' : ''}">
                             <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 16px;">
-                                💻 Физиологичен код на безопасност (SOUL Safety Gate)
+                                <i data-lucide="code" class="w-5 h-5 text-blue-400"></i>Физиологичен код на безопасност (SOUL Safety Gate)
                             </h3>
                             <pre class="code-container mono" style="white-space: pre-wrap; font-size: 0.85rem; color: #b2ccd6;">${codeBlock}</pre>
                         </div>
@@ -1391,12 +1392,15 @@ process YAMANAKA_OSK_REPROGRAM(
                     AETERNA v5.0 Substrate // ZERO-ENTROPY BIOLOGICAL CURE PROTOCOL // 2026
                 </footer>
             `;
+            if (window.lucide) {
+                setTimeout(() => lucide.createIcons(), 0);
+            }
         }
 
         // Run Vanilla engine
         window.addEventListener("DOMContentLoaded", () => {
             renderVanillaHUD();
-            addLogEntry("🟢 Self-Healing initialization complete. Offline Mode fully active.");
+            addLogEntry("[SUCCESS] Self-Healing initialization complete. Offline Mode fully active.");
         });
     </script>
 </body>
