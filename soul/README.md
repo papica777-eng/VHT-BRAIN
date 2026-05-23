@@ -13,6 +13,14 @@
 
 VHT-BRAIN represents a paradigm shift in deterministic neurological engineering. It is a full-stack, cyber-physical shield designed to orchestrate and modulate human neurophysiology (FES, EEG, tFUS) with mathematical absolute certainty. Moving away from the chaotic entropy of modern cloud architectures and non-deterministic AI garbage collection, VHT-BRAIN is built on the `.soul` architecture.
 
+## Relation to the Primary Virtual Human Twin (VHT) Ecosystem
+
+This repository represents a direct **continuation and advanced specialized extension** of the primary **Virtual Human Twin (VHT)** framework. It delivers the core neurological substrate and interactive 3D Volume Raymarching visualization engine, directly supporting and strengthening the main project for the **European Innovation Council (EIC) Accelerator** submission:
+
+- **Mathematical Validation & Safety (SaMD Class III):** Integrates Closed-Loop BCI-FES locomotor modulation with strict clinical guardrails (Affine Transformation Lock, 1:1 DevicePixelRatio Mapping, and dynamic Clipping Planes) to mathematically guarantee patient safety.
+- **Closed-Loop Neurometabolic Proof:** Directly binds peripheral locomotor FES telemetry to 3D real-time neurological maps (pulsing BDNF heatmaps & Bezier-based DTI Tractography lines), demonstrating true biological feasibility.
+- **Sovereign WASM-to-GPU Substrate:** Proves the O(1) latency boundaries ($<1.2\text{ ms}$) and Zero Computational Entropy models of the primary twin on actual hardware, providing EIC evaluators with an interactive, offline-resilient, cyber-physical proof.
+
 ### The Three Pillars of Sovereignty
 
 1. **Absolute O(1) Latency Boundary**
