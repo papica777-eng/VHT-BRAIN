@@ -1,6 +1,6 @@
 # VHT-BRAIN: Horizon Europe & EIC Brain Cancer Mission
 
-![VHT-BRAIN Cyber-Physical Shield](VHT_BRAIN_POSTER_PURPLE.png)
+![VHT-BRAIN Cyber-Physical Shield](refined_purple_twins_signed.png)
 
 ## EIC & Horizon Europe Project Submission Details
 
