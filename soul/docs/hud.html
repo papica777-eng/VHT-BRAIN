@@ -46,14 +46,14 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background-color: #03010a;
             color: var(--text-primary);
             overflow-x: hidden;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
-            background-size: 40px 40px, 40px 40px, 100% 100%;
+            background-image: 
+                linear-gradient(rgba(3, 1, 10, 0.75), rgba(6, 6, 8, 0.9)),
+                url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
             transition: background 1s ease, background-color 1s ease;
@@ -417,9 +417,7 @@
 </head>
 
 <body>
-    <!-- VHT-BRAIN Volume Raymarching Substrate Canvas -->
-    <canvas id="vht-brain-core"
-        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; background-color: #030107;"></canvas>
+    <!-- Sovereign Cosmic Telemetry Substrate -->
 
     <div id="app-root">
         <!-- Self-Healing Fallback Visual preloaded -->
@@ -486,7 +484,13 @@
             clickCoords: null,
             bdnfIntensity: 1.0,
             invModelViewProj: new Float32Array(16),
-            modelMatrixInverse: new Float32Array(16)
+            modelMatrixInverse: new Float32Array(16),
+            grantsKeyword: "cancer",
+            grantsList: [],
+            picSearchInput: "",
+            picOrgProfile: null,
+            grantsLoading: false,
+            picLoading: false
         };
 
         const rawChaoticData = [
@@ -652,7 +656,25 @@
                 isocenter: "ИЗОЦЕНТЪР",
                 affineLockCoords: "AFFINE LOCK КООРДИНАТИ",
                 hideTelemetry: "Скрий Телеметрията",
-                showTelemetry: "Покажи Телеметрията"
+                showTelemetry: "Покажи Телеметрията",
+                tabGrants: "EU Финансиране & Партньори",
+                searchPicLabel: "Търсене на организация по PIC номер:",
+                grantsListTitle: "Активни Грантове (Хоризонт Европа)",
+                picSearchBtn: "ИЗВЛЕЧИ ПРОФИЛ",
+                noGrantsFound: "Няма намерени отворени грантове.",
+                picDetailsTitle: "Профил на легалния субект",
+                picDetailsOrgName: "Организация:",
+                picDetailsCountry: "Държава:",
+                picDetailsStatus: "Статус:",
+                picDetailsVat: "ДДС номер:",
+                picDetailsWebsite: "Уебсайт:",
+                picDetailsProjects: "Активни проекти:",
+                grantsKeywordLabel: "Филтриране по ключова дума:",
+                btnSearchGrants: "ТЪРСЕНЕ НА ГРАНТОВЕ",
+                grantTitle: "Заглавие:",
+                grantDeadline: "Краен срок:",
+                grantBudget: "Бюджет на поканата:",
+                grantLink: "Към ЕС портал"
             },
             en: {
                 hudTitle: "AETERNA // SOVEREIGN NEURO-ONCOLOGY HUD",
@@ -789,7 +811,25 @@
                 isocenter: "ISOCENTER",
                 affineLockCoords: "AFFINE LOCK COORDINATES",
                 hideTelemetry: "Hide Telemetry HUD",
-                showTelemetry: "Show Telemetry HUD"
+                showTelemetry: "Show Telemetry HUD",
+                tabGrants: "EU Funding & Partners",
+                searchPicLabel: "Search Organisation by PIC Number:",
+                grantsListTitle: "Active Horizon Europe Grants",
+                picSearchBtn: "FETCH PROFILE",
+                noGrantsFound: "No open grants found.",
+                picDetailsTitle: "Legal Entity Profile",
+                picDetailsOrgName: "Organisation:",
+                picDetailsCountry: "Country:",
+                picDetailsStatus: "Status:",
+                picDetailsVat: "VAT Number:",
+                picDetailsWebsite: "Website:",
+                picDetailsProjects: "Active Projects:",
+                grantsKeywordLabel: "Filter by Keyword:",
+                btnSearchGrants: "SEARCH GRANTS",
+                grantTitle: "Title:",
+                grantDeadline: "Deadline:",
+                grantBudget: "Call Budget:",
+                grantLink: "Go to Opportunity"
             }
         };
 
@@ -896,7 +936,145 @@
 
         function switchTab(tabId) {
             state.activeTab = tabId;
+            if (tabId === "grants" && state.grantsList.length === 0) {
+                fetchHorizonGrants();
+            }
             renderVanillaHUD();
+        }
+
+        async function fetchHorizonGrants() {
+            if (state.grantsLoading) return;
+            state.grantsLoading = true;
+            renderVanillaHUD();
+            
+            const url = 'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA&text=***';
+            const kw = state.grantsKeyword || "cancer";
+            
+            const queryData = {
+                "bool": {
+                    "must": [
+                        { "terms": { "type": ["1", "2", "8"] } },
+                        { "terms": { "status": ["31094501", "31094502"] } },
+                        { "term": { "programmePeriod": "2021 - 2027" } }
+                    ],
+                    "should": [
+                        { "match": { "title": kw } },
+                        { "match": { "description": kw } }
+                    ],
+                    "minimum_should_match": 1
+                }
+            };
+
+            addLogEntry(
+                `EU_API: Сканиране на Хоризонт Европа грантове за ключова дума: "${kw}"...`,
+                `EU_API: Scanning Horizon Europe grants for keyword: "${kw}"...`
+            );
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(queryData)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const results = data.results || [];
+                
+                state.grantsList = results.map(item => {
+                    const meta = item.metadata || {};
+                    return {
+                        identifier: meta.identifier && meta.identifier[0] ? meta.identifier[0] : "No Identifier",
+                        title: meta.title && meta.title[0] ? meta.title[0] : "No Title",
+                        deadline: meta.deadlineDate && meta.deadlineDate[0] ? new Date(meta.deadlineDate[0]).toLocaleDateString() : "No Deadline",
+                        budget: meta.callBudget && meta.callBudget[0] ? `${parseFloat(meta.callBudget[0]).toLocaleString()} EUR` : "Not Specified",
+                        link: `https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/${(meta.ccReference && meta.ccReference[0] ? meta.ccReference[0] : "").toLowerCase()}`
+                    };
+                });
+
+                addLogEntry(
+                    `ONLINE: Заредени ${results.length} отворени гранта от ЕК.`,
+                    `ONLINE: Loaded ${results.length} active EU opportunities.`
+                );
+            } catch (err) {
+                console.error("EU API Error:", err);
+                addLogEntry(
+                    `CRITICAL_ALERT: Срив при комуникацията с ЕК API: ${err.message}`,
+                    `CRITICAL_ALERT: EC API Communication breakdown: ${err.message}`
+                );
+            } finally {
+                state.grantsLoading = false;
+                renderVanillaHUD();
+            }
+        }
+
+        async function fetchOrganisationByPic(picNumber) {
+            const trimmedPic = (picNumber || "").trim();
+            if (!trimmedPic) return;
+            
+            state.picLoading = true;
+            state.picOrgProfile = null;
+            renderVanillaHUD();
+
+            addLogEntry(
+                `EU_API: Извличане на профил за PIC: ${trimmedPic}...`,
+                `EU_API: Fetching legal profile for PIC: ${trimmedPic}...`
+            );
+
+            const url = 'https://api.tech.ec.europa.eu/search-api/prod/rest/search?apiKey=SEDIA_PERSON&text=***';
+            const queryData = {
+                "bool": {
+                    "must": [
+                        { "terms": { "type": ["ORGANISATION"] } },
+                        { "match": { "pic": trimmedPic } }
+                    ]
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(queryData)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const results = data.results || [];
+                
+                if (results.length > 0) {
+                    const org = results[0];
+                    const meta = org.metadata || {};
+                    state.picOrgProfile = {
+                        name: meta.legalName && meta.legalName[0] ? meta.legalName[0] : (meta.name && meta.name[0] ? meta.name[0] : "No Legal Name"),
+                        country: meta.countryName && meta.countryName[0] ? meta.countryName[0] : "Unknown",
+                        website: meta.website && meta.website[0] ? meta.website[0] : "Not Specified",
+                        status: meta.statusName && meta.statusName[0] ? meta.statusName[0] : "Unknown",
+                        vat: meta.vatNumber && meta.vatNumber[0] ? meta.vatNumber[0] : "None",
+                        pic: trimmedPic
+                    };
+                    addLogEntry(
+                        `SUCCESS: Извлечен профил за: ${state.picOrgProfile.name}`,
+                        `SUCCESS: Profile retrieved for: ${state.picOrgProfile.name}`
+                    );
+                } else {
+                    addLogEntry(
+                        `WARNING: Профилът за PIC ${trimmedPic} не бе намерен.`,
+                        `WARNING: Profile for PIC ${trimmedPic} not found.`
+                    );
+                }
+            } catch (err) {
+                console.error("PIC Fetch Error:", err);
+                addLogEntry(
+                    `CRITICAL_ALERT: Грешка при достъп до PIC базата: ${err.message}`,
+                    `CRITICAL_ALERT: Access error to PIC Registry: ${err.message}`
+                );
+            } finally {
+                state.picLoading = false;
+                renderVanillaHUD();
+            }
         }
 
         let gaitTimer = null;
@@ -1039,6 +1217,9 @@
                         </button>
                         <button class="tab-btn ${state.activeTab === 'vivisector' ? 'active' : ''}" onclick="switchTab('vivisector')">
                             <i data-lucide="dna" class="w-4 h-4 inline-block mr-2 text-indigo-400"></i>${t('vivisectorTitle')}
+                        </button>
+                        <button class="tab-btn ${state.activeTab === 'grants' ? 'active' : ''}" onclick="switchTab('grants')">
+                            <i data-lucide="globe" class="w-4 h-4 inline-block mr-2 text-cyan-400"></i>${t('tabGrants')}
                         </button>
                     </div>
                     <div>
@@ -1585,6 +1766,160 @@ process VERIFY_AURA_INTEGRITY(ph: Decimal, o2: Decimal) -> Boolean {
                         </div>
                     </div>
                 `;
+            } else if (state.activeTab === "grants") {
+                // Render EU opportunities and PIC searching card
+                let grantsTableBody = "";
+                if (state.grantsLoading) {
+                    grantsTableBody = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 24px;" class="mono text-indigo-300">
+                                <span class="status-dot bg-blue animate-pulse" style="width: 12px; height: 12px;"></span>
+                                ${state.language === 'bg' ? 'Зареждане на оферти от Европейската Комисия...' : 'Fetching active calls from EC Opportunity database...'}
+                            </td>
+                        </tr>
+                    `;
+                } else if (state.grantsList.length === 0) {
+                    grantsTableBody = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 24px; color: var(--text-secondary);" class="mono">
+                                ${t('noGrantsFound')}
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    grantsTableBody = state.grantsList.map(item => `
+                        <tr>
+                            <td style="font-weight: 700;" class="mono">${item.identifier}</td>
+                            <td>${item.title}</td>
+                            <td class="mono">${item.deadline}</td>
+                            <td class="mono" style="color: var(--neon-emerald); font-weight: 600;">${item.budget}</td>
+                            <td style="text-align: right;">
+                                <a href="${item.link}" target="_blank" class="tab-btn" style="padding: 6px 12px; display: inline-block; text-decoration: none; border-color: rgba(14, 165, 233, 0.4); color: var(--neon-blue); text-transform: none; letter-spacing: 0.5px;">
+                                    ${t('grantLink')} <i data-lucide="external-link" class="w-3 h-3 inline-block ml-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                let orgProfileHtml = "";
+                if (state.picLoading) {
+                    orgProfileHtml = `
+                        <div style="text-align: center; padding: 24px;" class="mono text-indigo-300">
+                            <span class="status-dot bg-blue animate-pulse" style="width: 12px; height: 12px;"></span>
+                            ${state.language === 'bg' ? 'Свързване с регистъра на ЕК за PIC...' : 'Querying EC PIC registry...'}
+                        </div>
+                    `;
+                } else if (state.picOrgProfile) {
+                    const prof = state.picOrgProfile;
+                    orgProfileHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 12px;" class="mono">
+                            <div style="font-size: 1rem; font-weight: bold; color: var(--neon-emerald); border-bottom: 1px solid rgba(16, 185, 129, 0.15); padding-bottom: 6px; margin-bottom: 8px;">
+                                <i data-lucide="check-circle" class="w-4 h-4 inline-block mr-1 text-emerald-400"></i> ${t('picDetailsTitle')}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px;">
+                                <span style="color: var(--text-secondary);">${t('picDetailsOrgName')}</span>
+                                <span style="font-weight: 700; color: #fff; text-align: right;">${prof.name}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px;">
+                                <span style="color: var(--text-secondary);">${t('picDetailsCountry')}</span>
+                                <span style="font-weight: 700; color: #fff;">${prof.country}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px;">
+                                <span style="color: var(--text-secondary);">${t('picDetailsStatus')}</span>
+                                <span style="font-weight: 700; color: var(--neon-blue);">${prof.status}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px;">
+                                <span style="color: var(--text-secondary);">${t('picDetailsVat')}</span>
+                                <span style="font-weight: 700; color: #fff;">${prof.vat}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px;">
+                                <span style="color: var(--text-secondary);">${t('picDetailsWebsite')}</span>
+                                <a href="${prof.website.startsWith('http') ? prof.website : 'https://' + prof.website}" target="_blank" style="font-weight: 700; color: var(--neon-blue); text-decoration: none;">
+                                    ${prof.website} <i data-lucide="external-link" class="w-3 h-3 inline-block ml-0.5"></i>
+                                </a>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-secondary);">${t('picDetailsProjects')}</span>
+                                <span style="font-weight: 700; color: var(--neon-purple);">${prof.pic} (PIC verified)</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    orgProfileHtml = `
+                        <div style="text-align: center; padding: 24px; color: var(--text-secondary);" class="mono">
+                            ${state.language === 'bg' ? 'Въведете 9-цифрен PIC номер и натиснете бутона за извличане.' : 'Enter a 9-digit PIC number and click fetch profile.'}
+                        </div>
+                    `;
+                }
+
+                tabContent = `
+                    <div class="dashboard-grid">
+                        <!-- Left Panel: Grants Opportunities Search and List -->
+                        <div class="glass-card glow-purple ${state.emergencyMode ? 'emergency-card' : ''}" style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(181,95,230,0.1); padding-bottom: 12px;">
+                                <div>
+                                    <h2 style="font-size: 1.5rem; font-weight: 900; display: flex; align-items: center; gap: 10px;">
+                                        <i data-lucide="globe" class="w-5 h-5 inline-block mr-2 text-cyan-400"></i>${t('grantsListTitle')}
+                                    </h2>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);" class="mono">${t('grantsKeywordLabel')}</span>
+                                    <input type="text" id="grants-keyword-input" value="${state.grantsKeyword}" onchange="state.grantsKeyword = this.value" onkeyup="if(event.key==='Enter') { state.grantsKeyword=this.value; fetchHorizonGrants(); }" style="background: rgba(0,0,0,0.4); border: 1px solid var(--purple-border); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; outline: none; width: 140px;" class="mono" />
+                                    <button onclick="state.grantsKeyword = document.getElementById('grants-keyword-input').value; fetchHorizonGrants()" class="tab-btn" style="padding: 6px 12px; border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(14, 165, 233, 0.05);">
+                                        ${t('btnSearchGrants')}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="overflow-x: auto; flex: 1;">
+                                <table class="sovereign-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>${t('grantTitle')}</th>
+                                            <th>${t('grantDeadline')}</th>
+                                            <th>${t('grantBudget')}</th>
+                                            <th style="text-align: right;">Portal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="mono">
+                                        ${grantsTableBody}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: PIC Organisation Lookup -->
+                        <div class="column-flex">
+                            <div class="glass-card glow-emerald ${state.emergencyMode ? 'emergency-card' : ''}" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                                <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(16, 185, 129, 0.1); padding-bottom: 8px;">
+                                    <i data-lucide="building" class="w-5 h-5 text-emerald-400"></i> ${t('searchPicLabel')}
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="text" id="pic-search-input" placeholder="e.g. 999993952" value="${state.picSearchInput}" onchange="state.picSearchInput = this.value" onkeyup="if(event.key==='Enter') { state.picSearchInput=this.value; fetchOrganisationByPic(state.picSearchInput); }" style="background: rgba(0,0,0,0.4); border: 1px solid var(--purple-border); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 0.9rem; outline: none; width: 100%;" class="mono" />
+                                    <button onclick="state.picSearchInput = document.getElementById('pic-search-input').value; fetchOrganisationByPic(state.picSearchInput)" class="cure-btn" style="background: linear-gradient(135deg, var(--neon-emerald), #059669); box-shadow: 0 0 15px var(--neon-emerald-glow); border-radius: 8px; padding: 10px 20px; font-size: 0.8rem; letter-spacing: 0.5px;">
+                                        ${t('picSearchBtn')}
+                                    </button>
+                                </div>
+
+                                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); border-radius: 12px; padding: 16px; min-height: 180px;">
+                                    ${orgProfileHtml}
+                                </div>
+                            </div>
+
+                            <!-- EU Policy Info -->
+                            <div class="glass-card" style="padding: 20px; font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary);">
+                                <h4 style="font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="info" class="w-4 h-4 text-cyan-400"></i> HORIZON EUROPE & SOVEREIGN VHT
+                                </h4>
+                                <p>
+                                    ${state.language === 'bg' ? 'Тази интеграция позволява реалновремено свързване на нашия Виртуален Близнак с финансиращи и колаборативни схеми от Европейската комисия. Търсете проекти и партньори с едно натискане за ускорено развитие на персонализираната онкологична платформа.' : 'This integration enables real-time synchronization between our Virtual Human Twin and European Commission funding/collaborative frameworks. Search for projects and target partners to accelerate sovereign neuro-oncological clinical validation.'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
 
             root.innerHTML = `
@@ -1626,8 +1961,6 @@ process VERIFY_AURA_INTEGRITY(ph: Decimal, o2: Decimal) -> Boolean {
                     ${t('footerText')}
                 </footer>
                 
-                ${renderSurgicalControlsCard()}
-                ${renderSurgicalCoordsCard()}
                 ${renderHudToggleButton()}
             `;
             if (window.lucide) {
