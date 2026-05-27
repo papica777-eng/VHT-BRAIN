@@ -43,3 +43,13 @@
 **/.env
 **/.DS_Store
 Thumbs.db
+
+# 6. SOVEREIGN BACKEND KERNELS — TRADE SECRET (Directive 2016/943/EU)
+# These MUST NEVER leave the local bare-metal vault (Pomorie HQ).
+# Even `git add -f` cannot override rules in this section if properly enforced.
+**/*.mojo
+**/*.soul
+BRUTAL_MODULES/
+OmniCore/
+*.rs
+*.zig
