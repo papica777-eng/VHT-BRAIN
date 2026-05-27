@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AETERNA // Sovereign VHT HUD</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/aeterna_logo.svg">
 
     <!-- React & Babel Standalone (Fallback-Resilient) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -491,8 +492,8 @@
             picOrgProfile: null,
             grantsLoading: false,
             picLoading: false,
-            aqp4Polarization: 0.85,
-            deltaWaveAmplitude: 95.0,
+            aqp4Polarization: 0.42,
+            deltaWaveAmplitude: 66.0,
             amyloidSynthesisRate: 1.50
         };
 
@@ -916,13 +917,23 @@
         function triggerCureRestoration() {
             if (state.isTransitioning || state.curedState) return;
             state.isTransitioning = true;
-            addLogEntry("BIO_CURE_INIT: ИНИЦИРАНЕ НА БИОЛОГИЧНО ИЗЛЕКУВАНЕ...", "BIO_CURE_INIT: INITIATING BIOLOGICAL CURE...");
+            
+            const required_boost = 95.0 - state.deltaWaveAmplitude;
+            
+            addLogEntry("BIO_CURE_INIT: ИНИЦИРАНЕ НА ТУМОРНА РЕВЕРСИЯ / НЕВРО-МОДУЛАЦИЯ...", "BIO_CURE_INIT: INITIATING TUMOR REVERSION / NEURO-MODULATION...");
             addLogEntry("ТРАНСФОРМАЦИЯ: Мобилизиране на Pax4 бета-регенеративен отговор...", "TRANSFORMATION: Mobilizing Pax4 beta-regenerative response...");
+            addLogEntry(
+                `[⚡ BCI-EEG] Induced resonant wave-sweep: +${required_boost.toFixed(1)} µV. Conformal fluid drainage deployed. Delta-accumulation terminated.`,
+                `[⚡ BCI-EEG] Induced resonant wave-sweep: +${required_boost.toFixed(1)} µV. Conformal fluid drainage deployed. Delta-accumulation terminated.`
+            );
 
             let duration = 3000;
             let intervalTime = 50;
             let steps = duration / intervalTime;
             let step = 0;
+
+            const startAQP4 = state.aqp4Polarization;
+            const startDelta = state.deltaWaveAmplitude;
 
             const timer = setInterval(() => {
                 step++;
@@ -931,6 +942,10 @@
                 state.entropy = parseFloat((3.56 - (3.56 - 0.05) * pct).toFixed(2));
                 state.cPeptide = parseFloat((0.01 + (0.90 - 0.01) * pct).toFixed(2));
                 state.homaIr = parseFloat((2.40 - (2.40 - 1.00) * pct).toFixed(2));
+
+                // Animate neurological parameters in closed-loop
+                state.aqp4Polarization = parseFloat((startAQP4 + (0.85 - startAQP4) * pct).toFixed(2));
+                state.deltaWaveAmplitude = parseFloat((startDelta + (95.0 - startDelta) * pct).toFixed(1));
 
                 currentGlucose = rawChaoticData.map((d, i) => {
                     const diff = d.val - curedData[i].val;
@@ -944,10 +959,16 @@
                     state.entropy = 0.05;
                     state.cPeptide = 0.90;
                     state.homaIr = 1.00;
+                    state.aqp4Polarization = 0.85;
+                    state.deltaWaveAmplitude = 95.0;
                     currentGlucose = [...curedData];
                     state.curedState = true;
                     state.isTransitioning = false;
                     addLogEntry("SUCCESS: БИОЛОГИЧНО ИЗЛЕКУВАНЕ: 100% TIR УСПЕШНО ВАЛИДИРАНО.", "SUCCESS: BIOLOGICAL CURE: 100% TIR SUCCESSFULLY VALIDATED.");
+                    
+                    if (typeof evaluateNeuroLogs === 'function') {
+                        evaluateNeuroLogs(true);
+                    }
                 }
                 renderVanillaHUD();
             }, intervalTime);
@@ -2189,7 +2210,7 @@ process VERIFY_AURA_INTEGRITY(ph: Decimal, o2: Decimal) -> Boolean {
             root.innerHTML = `
                 <header class="hud-transition ${state.hudVisible ? '' : 'hud-hidden'}" style="border-bottom: 1px solid var(--purple-border); padding: 18px 40px; background: rgba(5, 2, 12, 0.8); backdrop-filter: blur(25px); position: sticky; top: 0; z-index: 40; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="status-dot ${state.emergencyMode ? 'bg-red' : 'bg-purple'}"></div>
+                        <img src="../assets/aeterna_logo.svg" alt="AETERNA Logo" style="width: 26px; height: 26px;" />
                         <span style="font-weight: 900; font-size: 1.25rem; letter-spacing: 1.5px;">AETERNA // <span style="color: var(--neon-purple);" class="glow-text-purple">${t('hudTitle')}</span></span>
                     </div>
 
