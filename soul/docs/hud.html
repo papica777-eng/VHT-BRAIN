@@ -490,7 +490,10 @@
             picSearchInput: "",
             picOrgProfile: null,
             grantsLoading: false,
-            picLoading: false
+            picLoading: false,
+            aqp4Polarization: 0.85,
+            deltaWaveAmplitude: 95.0,
+            amyloidSynthesisRate: 1.50
         };
 
         const rawChaoticData = [
@@ -674,7 +677,28 @@
                 grantTitle: "Заглавие:",
                 grantDeadline: "Краен срок:",
                 grantBudget: "Бюджет на поканата:",
-                grantLink: "Към ЕС портал"
+                grantLink: "Към ЕС портал",
+                tabNeuro: "Невро-Навигатор",
+                neuroTitle: "Глимфатичен Дренажен Баланс",
+                neuroDesc: "Моделиране на масовия баланс на Амилоид-β и Тау в интерстициалното пространство по време на NREM сън.",
+                aqp4Label: "AQP4 Поляризация (Аквапорин-4)",
+                deltaWaveLabel: "EEG Делта-Вълни (Амплитуда)",
+                synthesisRateLabel: "Базова скорост на синтез (K_synthesis)",
+                clearanceFlowLabel: "Глимфатичен Дебит (Phi)",
+                massBalanceLabel: "Масов Баланс (d[Aβ]/dt)",
+                statusLabel: "СТАТУС НА СУБСТРАТА:",
+                homeostasisGuaranteed: "🟢 HOMEOSTASIS_GUARANTEED",
+                toxicEntropy: "🔴 TOXIC_ENTROPY_ACCUMULATION",
+                verdictLabel: "КЛИНИЧЕН ВЕРДИКТ:",
+                verdictHomeostasis: "Спирането на когнитивния упадък е детерминистично доказано. Активен CSF дренаж.",
+                verdictToxic: "Патологично натрупване на протеопатия в церебралния субстрат. Риск от когнитивен упадък.",
+                aqp4PolarizationDesc: "Поляризацията на AQP4 водни канали по крайните крачета на астроцитите е хидравличната помпа на мозъка. Падането под 0.60 води до разпръскване на каналите и срив на флуидния поток.",
+                deltaWaveDesc: "EEG делта-вълни с голяма амплитуда (>75 µV) по време на NREM сън координират масивните CSF пулсации за разширяване на интерстициалното пространство с 60%.",
+                synthesisRateDesc: "Скорост на базовия патологичен синтез на амилоид-β протеини.",
+                scenariosTitle: "Клинични Сценарии (Mojo Тест)",
+                scenario1Btn: "Сценарий 1: Дълбок NREM сън",
+                scenario2Btn: "Сценарий 2: AQP4 Деполяризация",
+                scenario3Btn: "Сценарий 3: Повърхностен NREM сън"
             },
             en: {
                 hudTitle: "AETERNA // SOVEREIGN NEURO-ONCOLOGY HUD",
@@ -829,7 +853,28 @@
                 grantTitle: "Title:",
                 grantDeadline: "Deadline:",
                 grantBudget: "Call Budget:",
-                grantLink: "Go to Opportunity"
+                grantLink: "Go to Opportunity",
+                tabNeuro: "Neuro-Navigator",
+                neuroTitle: "Glymphatic Drainage Balance",
+                neuroDesc: "Modeling the mass balance of Amyloid-β and Tau proteins in the interstitial space during NREM sleep.",
+                aqp4Label: "AQP4 Polarization (Aquaporin-4)",
+                deltaWaveLabel: "EEG Delta Wave (Amplitude)",
+                synthesisRateLabel: "Base Synthesis Rate (K_synthesis)",
+                clearanceFlowLabel: "Glymphatic Flow Rate (Phi)",
+                massBalanceLabel: "Mass Balance (d[Aβ]/dt)",
+                statusLabel: "SUBSTRATE STATUS:",
+                homeostasisGuaranteed: "🟢 HOMEOSTASIS_GUARANTEED",
+                toxicEntropy: "🔴 TOXIC_ENTROPY_ACCUMULATION",
+                verdictLabel: "CLINICAL VERDICT:",
+                verdictHomeostasis: "Cognitive decline halt is deterministically proven. Active CSF drainage.",
+                verdictToxic: "Pathological accumulation of proteopathy in the cerebral substrate. Risk of cognitive decline.",
+                aqp4PolarizationDesc: "AQP4 channel polarization at astrocyte endfeet acts as the brain's hydraulic pump. Falling below 0.60 causes channels to scatter, collapsing directional CSF flow.",
+                deltaWaveDesc: "High-amplitude EEG delta waves (>75 µV) during NREM sleep coordinate massive CSF pulsations to expand the interstitial space by 60%.",
+                synthesisRateDesc: "The rate of base pathological synthesis of amyloid-β proteins.",
+                scenariosTitle: "Clinical Scenarios (Mojo Test)",
+                scenario1Btn: "Scenario 1: Deep NREM Sleep",
+                scenario2Btn: "Scenario 2: AQP4 Depolarization",
+                scenario3Btn: "Scenario 3: Light NREM Sleep"
             }
         };
 
@@ -1196,6 +1241,63 @@
             return `${path} L ${last.x.toFixed(1)} ${height - padding} L ${first.x.toFixed(1)} ${height - padding} Z`;
         }
 
+        // --- GLYMPHATIC CLEARANCE ENGINE ---
+        function evaluateGlymphaticClearance(aqp4, deltaWave, synthesisRate) {
+            if (aqp4 < 0.0 || deltaWave < 0.0) {
+                return { phi: 0.0, derivative: synthesisRate, isHomeostasis: false, powerFactor: 0.0 };
+            }
+            const minAqp4 = 0.60;
+            const minDelta = 75.0;
+            const powerFactor = aqp4 * (deltaWave / 100.0);
+            const phiMax = synthesisRate * 2.5;
+            
+            // Non-linear hydraulic resistance (Sigmoid)
+            const exponent = -10.0 * (powerFactor - (minAqp4 * (minDelta / 100.0)));
+            let phi = 0.0;
+            try {
+                phi = phiMax / (1.0 + Math.exp(exponent));
+            } catch (e) {
+                phi = exponent > 0 ? 0.0 : phiMax;
+            }
+            const derivative = synthesisRate - phi;
+            const isHomeostasis = aqp4 >= minAqp4 && deltaWave >= minDelta && derivative < 0.0;
+            return { phi, derivative, isHomeostasis, powerFactor };
+        }
+
+        let lastHomeostasisState = null;
+        function evaluateNeuroLogs(force = false) {
+            const clearance = evaluateGlymphaticClearance(state.aqp4Polarization, state.deltaWaveAmplitude, state.amyloidSynthesisRate);
+            if (lastHomeostasisState === null) {
+                lastHomeostasisState = clearance.isHomeostasis;
+            }
+            if (clearance.isHomeostasis !== lastHomeostasisState || force) {
+                lastHomeostasisState = clearance.isHomeostasis;
+                if (clearance.isHomeostasis) {
+                    addLogEntry(
+                        `ONLINE: [GLYMPHATIC_CLEANING] CSF convective sweep active! AQP4 channels successfully flushing vascular amyloid. d[Aβ]/dt = ${clearance.derivative.toFixed(4)} pg/mL/sec.`,
+                        `ONLINE: [GLYMPHATIC_CLEANING] CSF convective sweep active! AQP4 channels successfully flushing vascular amyloid. d[Aβ]/dt = ${clearance.derivative.toFixed(4)} pg/mL/sec.`
+                    );
+                } else {
+                    addLogEntry(
+                        `CRITICAL_ALERT: [CLINICAL_ALERT] AQP4 channel depolarization or low EEG delta waves! Convective glymphatic flow collapsed. d[Aβ]/dt = +${clearance.derivative.toFixed(4)} pg/mL/sec.`,
+                        `CRITICAL_ALERT: [CLINICAL_ALERT] AQP4 channel depolarization or low EEG delta waves! Convective glymphatic flow collapsed. d[Aβ]/dt = +${clearance.derivative.toFixed(4)} pg/mL/sec.`
+                    );
+                }
+            }
+        }
+
+        function injectNeuroScenario(aqp4, delta, synthesis) {
+            state.aqp4Polarization = aqp4;
+            state.deltaWaveAmplitude = delta;
+            state.amyloidSynthesisRate = synthesis;
+            addLogEntry(
+                `NEURO_SIM: Инжектиране на физиологичен сценарий: AQP4=${aqp4.toFixed(2)}, DeltaWave=${delta.toFixed(1)} µV.`,
+                `NEURO_SIM: Injecting physiological scenario: AQP4=${aqp4.toFixed(2)}, DeltaWave=${delta.toFixed(1)} µV.`
+            );
+            evaluateNeuroLogs(true);
+            renderVanillaHUD();
+        }
+
         function renderVanillaHUD() {
             const root = document.getElementById("app-root");
             if (!root) return;
@@ -1220,6 +1322,9 @@
                         </button>
                         <button class="tab-btn ${state.activeTab === 'grants' ? 'active' : ''}" onclick="switchTab('grants')">
                             <i data-lucide="globe" class="w-4 h-4 inline-block mr-2 text-cyan-400"></i>${t('tabGrants')}
+                        </button>
+                        <button class="tab-btn ${state.activeTab === 'neuro' ? 'active' : ''}" onclick="switchTab('neuro')">
+                            <i data-lucide="brain" class="w-4 h-4 inline-block mr-2 text-rose-400"></i>${t('tabNeuro')}
                         </button>
                     </div>
                     <div>
@@ -1916,6 +2021,165 @@ process VERIFY_AURA_INTEGRITY(ph: Decimal, o2: Decimal) -> Boolean {
                                 <p>
                                     ${state.language === 'bg' ? 'Тази интеграция позволява реалновремено свързване на нашия Виртуален Близнак с финансиращи и колаборативни схеми от Европейската комисия. Търсете проекти и партньори с едно натискане за ускорено развитие на персонализираната онкологична платформа.' : 'This integration enables real-time synchronization between our Virtual Human Twin and European Commission funding/collaborative frameworks. Search for projects and target partners to accelerate sovereign neuro-oncological clinical validation.'}
                                 </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (state.activeTab === "neuro") {
+                const clearance = evaluateGlymphaticClearance(state.aqp4Polarization, state.deltaWaveAmplitude, state.amyloidSynthesisRate);
+                
+                let statusBadge = "";
+                let verdictText = "";
+                let badgeClass = "";
+                let badgeStyle = "";
+                
+                if (clearance.isHomeostasis) {
+                    statusBadge = t('homeostasisGuaranteed');
+                    badgeClass = "bg-emerald animate-pulse";
+                    badgeStyle = "background: rgba(16, 185, 129, 0.15); border: 1px solid var(--neon-emerald); color: var(--neon-emerald); font-weight: 900; padding: 12px; border-radius: 8px; font-size: 1rem; text-align: center; text-shadow: 0 0 10px rgba(16,185,129,0.3); letter-spacing: 0.5px;";
+                    verdictText = t('verdictHomeostasis');
+                } else {
+                    statusBadge = t('toxicEntropy');
+                    badgeClass = "bg-red animate-pulse";
+                    badgeStyle = "background: rgba(239, 68, 68, 0.15); border: 1px solid var(--neon-red); color: var(--neon-red); font-weight: 900; padding: 12px; border-radius: 8px; font-size: 1rem; text-align: center; text-shadow: 0 0 10px rgba(239,68,68,0.3); letter-spacing: 0.5px;";
+                    verdictText = t('verdictToxic');
+                }
+
+                tabContent = `
+                    <div class="dashboard-grid">
+                        <!-- Left Panel: Sliders & Mechanics -->
+                        <div class="glass-card glow-purple ${state.emergencyMode ? 'emergency-card' : ''}" style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="border-bottom: 1px solid rgba(181,95,230,0.15); padding-bottom: 12px;">
+                                <h2 style="font-size: 1.5rem; font-weight: 900; display: flex; align-items: center; gap: 10px;">
+                                    <i data-lucide="brain" class="w-5 h-5 text-rose-400"></i> ${t('neuroTitle')}
+                                </h2>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">
+                                    ${t('neuroDesc')}
+                                </p>
+                            </div>
+
+                            <!-- Math display block -->
+                            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.02); border-radius: 12px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6; color: #a5b4fc;">
+                                <div style="font-weight: 700; color: #fff; margin-bottom: 6px; font-size: 0.9rem;">
+                                    [EQUATION OF EXISTENCE]:
+                                </div>
+                                <div style="font-size: 1.15rem; text-align: center; margin: 12px 0; color: #fff; font-weight: 700;">
+                                    d[Aβ]/dt = K_synthesis - Phi_glymphatic
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: 0.8rem;">
+                                    ${state.language === 'bg' ? '* K_synthesis = Скорост на амилоиден синтез.<br>* Phi = f(AQP4, DeltaWave) - нелинейна сигмоидна функция на изчистване.' : '* K_synthesis = Pathological amyloid synthesis rate.<br>* Phi = f(AQP4, DeltaWave) - non-linear hydraulic resistance curve.'}
+                                </div>
+                            </div>
+
+                            <!-- Sliders -->
+                            <div style="display: flex; flex-direction: column; gap: 18px;">
+                                <!-- AQP4 slider -->
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight: 700; font-size: 0.85rem; color: #fff;">${t('aqp4Label')}</span>
+                                        <span class="mono" style="font-size: 1.1rem; font-weight: 800; color: ${state.aqp4Polarization >= 0.60 ? 'var(--neon-emerald)' : 'var(--neon-red)'};">${state.aqp4Polarization.toFixed(2)}</span>
+                                    </div>
+                                    <input type="range" min="0.00" max="1.00" step="0.01" value="${state.aqp4Polarization}" 
+                                        oninput="state.aqp4Polarization = parseFloat(this.value); evaluateNeuroLogs(); renderVanillaHUD();" 
+                                        style="width: 100%; cursor: pointer;" />
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3;">
+                                        ${t('aqp4PolarizationDesc')}
+                                    </div>
+                                </div>
+
+                                <!-- Delta Wave slider -->
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight: 700; font-size: 0.85rem; color: #fff;">${t('deltaWaveLabel')}</span>
+                                        <span class="mono" style="font-size: 1.1rem; font-weight: 800; color: ${state.deltaWaveAmplitude >= 75.0 ? 'var(--neon-emerald)' : 'var(--neon-red)'};">${state.deltaWaveAmplitude.toFixed(1)} µV</span>
+                                    </div>
+                                    <input type="range" min="0.0" max="150.0" step="1.0" value="${state.deltaWaveAmplitude}" 
+                                        oninput="state.deltaWaveAmplitude = parseFloat(this.value); evaluateNeuroLogs(); renderVanillaHUD();" 
+                                        style="width: 100%; cursor: pointer;" />
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3;">
+                                        ${t('deltaWaveDesc')}
+                                    </div>
+                                </div>
+
+                                <!-- Synthesis Rate slider -->
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-weight: 700; font-size: 0.85rem; color: #fff;">${t('synthesisRateLabel')}</span>
+                                        <span class="mono" style="font-size: 1.1rem; font-weight: 800; color: var(--neon-blue);">${state.amyloidSynthesisRate.toFixed(2)} pg/mL/sec</span>
+                                    </div>
+                                    <input type="range" min="0.50" max="3.00" step="0.10" value="${state.amyloidSynthesisRate}" 
+                                        oninput="state.amyloidSynthesisRate = parseFloat(this.value); evaluateNeuroLogs(); renderVanillaHUD();" 
+                                        style="width: 100%; cursor: pointer;" />
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3;">
+                                        ${t('synthesisRateDesc')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Diagnostics, Scenarios, Verdict -->
+                        <div class="column-flex">
+                            <!-- Verdict and Status card -->
+                            <div class="glass-card ${clearance.isHomeostasis ? 'glow-emerald' : 'glow-red'}" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                                <div style="font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; color: #fff;">
+                                    <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i> ${t('statusLabel')}
+                                </div>
+
+                                <div style="${badgeStyle}" class="${badgeClass}">
+                                    ${statusBadge}
+                                </div>
+
+                                <div style="display: flex; flex-direction: column; gap: 8px;" class="mono">
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px; font-size: 0.85rem;">
+                                        <span style="color: var(--text-secondary);">${t('synthesisRateLabel')}</span>
+                                        <span style="font-weight: 700; color: #fff;">+${state.amyloidSynthesisRate.toFixed(4)} pg/mL/sec</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px; font-size: 0.85rem;">
+                                        <span style="color: var(--text-secondary);">${t('clearanceFlowLabel')}</span>
+                                        <span style="font-weight: 700; color: var(--neon-emerald);">${clearance.phi.toFixed(4)} pg/mL/sec</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 6px; font-size: 0.85rem;">
+                                        <span style="color: var(--text-secondary);">Power Factor:</span>
+                                        <span style="font-weight: 700; color: var(--neon-purple);">${clearance.powerFactor.toFixed(4)} (Threshold: 0.4500)</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                                        <span style="color: var(--text-secondary);">${t('massBalanceLabel')}</span>
+                                        <span style="font-weight: 800; color: ${clearance.isHomeostasis ? 'var(--neon-emerald)' : 'var(--neon-red)'}; font-size: 0.95rem;">
+                                            ${clearance.derivative > 0 ? '+' : ''}${clearance.derivative.toFixed(4)} pg/mL/sec
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.02);">
+                                    <span style="font-weight: 700; font-size: 0.8rem; color: #fff; display: block; margin-bottom: 4px;">${t('verdictLabel')}</span>
+                                    <p style="font-size: 0.8rem; line-height: 1.4; color: var(--text-secondary);">
+                                        ${verdictText}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Clickable sleep scenarios -->
+                            <div class="glass-card glow-purple" style="padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+                                    <i data-lucide="video" class="w-4 h-4 text-purple-400"></i> ${t('scenariosTitle')}
+                                </div>
+
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <button onclick="injectNeuroScenario(0.85, 95.0, 1.5)" class="tab-btn" style="text-align: left; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.02); color: #fff; width: 100%;">
+                                        <span style="font-weight: 800; font-size: 0.8rem; color: var(--neon-emerald);">${t('scenario1Btn')}</span>
+                                        <span style="font-size: 0.7rem; color: var(--text-secondary);">${state.language === 'bg' ? 'AQP4 = 0.85, Delta = 95 µV. Гарантиран CSF дренаж.' : 'AQP4 = 0.85, Delta = 95 µV. Guaranteed CSF sweep.'}</span>
+                                    </button>
+
+                                    <button onclick="injectNeuroScenario(0.45, 85.0, 1.5)" class="tab-btn" style="text-align: left; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.02); color: #fff; width: 100%;">
+                                        <span style="font-weight: 800; font-size: 0.8rem; color: var(--neon-red);">${t('scenario2Btn')}</span>
+                                        <span style="font-size: 0.7rem; color: var(--text-secondary);">${state.language === 'bg' ? 'AQP4 = 0.45 (Деполяризация), Delta = 85 µV. Срив на филтрацията.' : 'AQP4 = 0.45 (Depolarized), Delta = 85 µV. Flow collapsed.'}</span>
+                                    </button>
+
+                                    <button onclick="injectNeuroScenario(0.75, 45.0, 1.5)" class="tab-btn" style="text-align: left; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.02); color: #fff; width: 100%;">
+                                        <span style="font-weight: 800; font-size: 0.8rem; color: var(--neon-amber);">${t('scenario3Btn')}</span>
+                                        <span style="font-size: 0.7rem; color: var(--text-secondary);">${state.language === 'bg' ? 'AQP4 = 0.75, Delta = 45 µV (Повърхностен сън). Недостатъчен дебит.' : 'AQP4 = 0.75, Delta = 45 µV (Light Sleep). Insufficient flow.'}</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
