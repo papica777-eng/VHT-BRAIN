@@ -1752,21 +1752,6 @@
                     </div>
 
 
-                    <!-- 3D LITE BRAIN VISUALIZER (NEW) -->
-                    <div class="glass-card" style="margin-bottom: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 0; overflow: hidden; min-height: 400px; border: 1px solid rgba(181, 95, 230, 0.2);">
-                        <img src="./vht_brain_hud_preview.png" style="width: 100%; object-fit: cover; filter: contrast(1.1) brightness(1.1);" alt="3D Brain Model" />
-                        
-                        <!-- Dynamic overlay: Red glowing area for tumor (if chaotic), green for cured -->
-                        <div style="position: absolute; top: 40%; left: 55%; width: ${state.curedState ? '0px' : '60px'}; height: ${state.curedState ? '0px' : '60px'}; background: radial-gradient(circle, rgba(239, 68, 68, 0.8) 0%, rgba(239, 68, 68, 0) 70%); box-shadow: 0 0 30px rgba(239,68,68,0.9); border-radius: 50%; opacity: ${state.curedState ? '0' : '1'}; transition: all 2.5s cubic-bezier(0.16, 1, 0.3, 1);" class="animate-pulse"></div>
-
-                        <!-- Cured overlay -->
-                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: ${state.curedState ? 'rgba(16, 185, 129, 0.1)' : 'transparent'}; box-shadow: inset 0 0 100px ${state.curedState ? 'rgba(16, 185, 129, 0.35)' : 'transparent'}; pointer-events: none; transition: all 2.5s ease;"></div>
-
-                        <div style="position: absolute; bottom: 20px; left: 24px; display: flex; flex-direction: column; gap: 4px; background: rgba(5,2,12,0.7); backdrop-filter: blur(10px); padding: 12px 18px; border-radius: 8px; border: 1px solid var(--purple-border);">
-                            <span class="mono" style="color: var(--neon-purple); font-weight: 800; font-size: 0.95rem; letter-spacing: 1px;">3D DIGITAL SCALPEL (LITE RENDERING)</span>
-                            <span style="color: #fff; font-size: 0.8rem; font-weight: 600; opacity: 0.9;">System Status: <span style="color: ${state.curedState ? 'var(--neon-emerald)' : 'var(--neon-red)'}; font-weight: 800;">${state.curedState ? 'HOMEOSTASIS ACHIEVED (0.00 cm³)' : 'ACTIVE NEOPLASM DETECTED'}</span></span>
-                        </div>
-                    </div>
 
                     <!-- Required Delta Boost Dashboard Indicator -->
                     <div style="background: rgba(99, 102, 241, 0.03); border: 1px solid rgba(99, 102, 241, 0.12); border-radius: 16px; padding: 14px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;" class="mono">
@@ -2808,6 +2793,17 @@ process VERIFY_AURA_INTEGRITY(ph: Decimal, o2: Decimal) -> Boolean {
             }
 
             root.innerHTML = `
+                <!-- FULLSCREEN STATIC VISUALIZER BACKGROUND -->
+                <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; display: flex; justify-content: center; align-items: center; background-color: #03010a; overflow: hidden;">
+                    <img src="./vht_brain_hud_preview.png" style="width: 100%; height: 100%; object-fit: cover; filter: contrast(1.1) brightness(1.1) opacity(0.6);" alt="3D Brain Background" />
+                    
+                    <!-- Dynamic overlay: Red glowing area for tumor (if chaotic), green for cured -->
+                    <div style="position: absolute; top: 40%; left: 55%; width: ${state.curedState ? '0px' : '20vw'}; height: ${state.curedState ? '0px' : '20vw'}; background: radial-gradient(circle, rgba(239, 68, 68, 0.5) 0%, rgba(239, 68, 68, 0) 70%); box-shadow: 0 0 60px rgba(239,68,68,0.5); border-radius: 50%; opacity: ${state.curedState ? '0' : '1'}; transition: all 2.5s cubic-bezier(0.16, 1, 0.3, 1);" class="animate-pulse"></div>
+
+                    <!-- Cured overlay -->
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: ${state.curedState ? 'rgba(16, 185, 129, 0.05)' : 'transparent'}; box-shadow: inset 0 0 150px ${state.curedState ? 'rgba(16, 185, 129, 0.2)' : 'transparent'}; pointer-events: none; transition: all 2.5s ease;"></div>
+                </div>
+
                 <header class="hud-transition ${state.hudVisible ? '' : 'hud-hidden'}" style="border-bottom: 1px solid var(--purple-border); padding: 18px 40px; background: rgba(5, 2, 12, 0.8); backdrop-filter: blur(25px); position: sticky; top: 0; z-index: 40; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <img src="./assets/aeterna_logo.svg" alt="AETERNA Logo" style="width: 26px; height: 26px;" />
